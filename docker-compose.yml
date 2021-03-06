@@ -1,0 +1,57 @@
+version: '3.7'
+
+services:
+  mysql:
+    image: mysql:8.0
+    ports:
+      - "8306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: adminpwd
+      MYSQL_USER: lportal
+      MYSQL_PASSWORD: lportal
+      MYSQL_DATABASE: demo_insurance73
+    volumes:
+      - ./mysql/conf.d:/etc/mysql/conf.d
+      - ./mysql/initdb.d:/docker-entrypoint-initdb.d
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+        test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+        timeout: 10s
+        retries: 10
+  liferay:
+    image: liferay/dxp:7.3.10-ga1
+    depends_on:
+      - mysql
+    links:
+      - mysql:mysql
+    environment:
+      LIFERAY_RETRY_PERIOD_JDBC_PERIOD_ON_PERIOD_STARTUP_PERIOD_DELAY: 2
+      LIFERAY_RETRY_PERIOD_JDBC_PERIOD_ON_PERIOD_STARTUP_PERIOD_MAX_PERIOD_RETRIES: 10
+      LIFERAY_JVM_OPTS: "-Xms2560m -Xmx4096m"
+      LIFERAY_SETUP_PERIOD_WIZARD_PERIOD_ENABLED: "false"
+      LIFERAY_TERMS_PERIOD_OF_PERIOD_USE_PERIOD_REQUIRED: "false"
+      LIFERAY_USERS_PERIOD_REMINDER_PERIOD_QUERIES_PERIOD_ENABLED: "false"
+      LIFERAY_USERS_PERIOD_REMINDER_PERIOD_QUERIES_PERIOD_CUSTOM_PERIOD_QUESTION_PERIOD_ENABLED: "false"     
+      LIFERAY_SESSION_PERIOD_TIMEOUT_PERIOD_AUTO_PERIOD_EXTEND: "true" 
+      LIFERAY_JDBC_PERIOD_DEFAULT_PERIOD_DRIVER_UPPERCASEC_LASS_UPPERCASEN_AME: "com.mysql.cj.jdbc.Driver"
+      LIFERAY_JDBC_PERIOD_DEFAULT_PERIOD_PASSWORD: "lportal"
+      LIFERAY_JDBC_PERIOD_DEFAULT_PERIOD_USERNAME: "lportal"
+      LIFERAY_JDBC_PERIOD_DEFAULT_PERIOD_URL: "jdbc:mysql://mysql/demo_insurance73?characterEncoding=UTF-8&dontTrackOpenResources=true&holdResultsOpenOverStatementClose=true&useFastDateParsing=false&useUnicode=true"
+    ports:
+      - "8080:8080"
+      - "11311:11311"
+    volumes:
+      - ./liferay:/mnt/liferay
+      - liferay-data:/opt/liferay/data
+      - liferay-osgi-modules:/opt/liferay/osgi/modules
+      - liferay-osgi-war:/opt/liferay/osgi/war
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/c/portal/layout"]
+      start_period: 1m
+      interval: 1m
+      retries: 3
+volumes:
+  liferay-data:
+  liferay-osgi-modules:
+  liferay-osgi-war:
+  mysql-data:
