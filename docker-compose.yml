@@ -15,19 +15,16 @@ services:
       - ./mysql/conf.d:/etc/mysql/conf.d
       - ./mysql/initdb.d:/docker-entrypoint-initdb.d
       - mysql-data:/var/lib/mysql
-    healthcheck:
-        test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
-        timeout: 10s
-        retries: 10
   liferay:
-    image: liferay/dxp:7.3.10-ga1
+    build:
+      dockerfile: liferay/Dockerfile
+      context: .
+      args:
+        - BASE_IMAGE=liferay/dxp:7.3.10-ga1
     depends_on:
-      - mysql
-    links:
-      - mysql:mysql
+      - "mysql"
+    entrypoint: /usr/local/bin/wait-for -t 60 mysql:3306 -- /usr/local/bin/liferay_entrypoint.sh
     environment:
-      LIFERAY_RETRY_PERIOD_JDBC_PERIOD_ON_PERIOD_STARTUP_PERIOD_DELAY: 2
-      LIFERAY_RETRY_PERIOD_JDBC_PERIOD_ON_PERIOD_STARTUP_PERIOD_MAX_PERIOD_RETRIES: 10
       LIFERAY_JVM_OPTS: "-Xms2560m -Xmx4096m"
       LIFERAY_SETUP_PERIOD_WIZARD_PERIOD_ENABLED: "false"
       LIFERAY_TERMS_PERIOD_OF_PERIOD_USE_PERIOD_REQUIRED: "false"
@@ -43,16 +40,6 @@ services:
       - "11311:11311"
     volumes:
       - ./liferay:/mnt/liferay
-      - liferay-data:/opt/liferay/data
-      - liferay-osgi-modules:/opt/liferay/osgi/modules
-      - liferay-osgi-war:/opt/liferay/osgi/war
-    healthcheck:
-      test: ["CMD", "curl", "-fsS", "http://localhost:8080/c/portal/layout"]
-      start_period: 1m
-      interval: 1m
-      retries: 3
+      - ./liferay/data:/opt/liferay/data
 volumes:
-  liferay-data:
-  liferay-osgi-modules:
-  liferay-osgi-war:
   mysql-data:
