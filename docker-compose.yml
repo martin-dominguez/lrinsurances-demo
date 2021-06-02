@@ -40,6 +40,5 @@ services:
       - "11311:11311"
     volumes:
       - ./liferay:/mnt/liferay
-      - ./liferay/data:/opt/liferay/data
 volumes:
   mysql-data:
