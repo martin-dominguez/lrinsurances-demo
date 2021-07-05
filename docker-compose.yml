@@ -20,7 +20,7 @@ services:
       dockerfile: liferay/Dockerfile
       context: .
       args:
-        - BASE_IMAGE=liferay/dxp:7.3.10-dxp-1
+        - BASE_IMAGE=liferay/dxp:7.3.10-dxp-2
     container_name: lrinsurances-liferay
     depends_on:
       - "mysql"
