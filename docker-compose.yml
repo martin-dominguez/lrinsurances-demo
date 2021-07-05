@@ -20,7 +20,8 @@ services:
       dockerfile: liferay/Dockerfile
       context: .
       args:
-        - BASE_IMAGE=liferay/dxp:7.3.10-ga1
+        - BASE_IMAGE=liferay/dxp:7.3.10-dxp-1
+    container_name: lrinsurances-liferay
     depends_on:
       - "mysql"
     entrypoint: /usr/local/bin/wait-for -t 60 mysql:3306 -- /usr/local/bin/liferay_entrypoint.sh
